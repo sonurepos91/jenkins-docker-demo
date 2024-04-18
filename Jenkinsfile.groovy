@@ -55,11 +55,10 @@ pipeline {
             steps {
                 script {
                     echo "Maven Build Started...... "
-
                     List PROJECT_WIN_VARS = [
                             "JAVA_HOME=C:\\Program Files\\Java\\jdk-17\\",
                             "MAVEN_HOME=C:\\Softwares\\apache-maven-3.9.5-bin\\apache-maven-3.9.5\\",
-                            "PATH=C:\\WINDOWS\\SYSTEM32;C:\\Softwares\\apache-maven-3.9.5-bin\\apache-maven-3.9.5\\bin,%PATH%"
+                            "PATH=C:\\WINDOWS\\SYSTEM32;C:\\Softwares\\apache-maven-3.9.5-bin\\apache-maven-3.9.5\\bin;%PATH%"
 
                     ]
                     withEnv(PROJECT_WIN_VARS) {
@@ -77,9 +76,6 @@ pipeline {
         stage("Deploy") {
             steps {
                 echo "Deploy Started...... "
-                dir("${env.WORKSPACE}\\Project\\target"){
-                    archiveArtifacts artifacts: '*.jar'
-                }
                 echo "Deploy Completed...... "
             }
         }
