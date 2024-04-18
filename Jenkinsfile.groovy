@@ -13,7 +13,7 @@ properties([parameters(
                         name: "gitBranch"
                 ),
                 string(
-                        defaultValue: "https://github.com/sonurepos91/kafka-Producer.git",
+                        defaultValue: "https://github.com/sonurepos91/jenkins-docker-demo.git",
                         description: "Git URL",
                         name: "gitUrl"
                 ),
