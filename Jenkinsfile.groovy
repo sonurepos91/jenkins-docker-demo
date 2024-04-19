@@ -69,7 +69,7 @@ pipeline {
                     echo "Deploy Started...... "
                     dir(env.WORKSPACE + '\\Project') {
                         bat "docker build -t pipeline:$BUILD_NUMBER ."
-                        bat "docker create -it -d --name pipeline$BUILD_NUMBER -p 0.0.0.0:54671:9002 pipeline:$BUILD_NUMBER"
+                        bat "docker create -it --name pipeline$BUILD_NUMBER -p 0.0.0.0:54671:9002 pipeline:$BUILD_NUMBER"
                         bat "docker start pipeline$BUILD_NUMBER"
                     }
                     echo "Deploy Completed...... "
