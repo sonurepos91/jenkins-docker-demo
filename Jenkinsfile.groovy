@@ -76,7 +76,7 @@ pipeline {
                     echo "Deploy Started...... "
                     dir(env.WORKSPACE + '\\Project') {
                         bat "docker build -t pipeline:$BUILD_NUMBER ."
-                        bat "docker run -it -d --name pipeline$BUILD_NUMBER -p 0.0.0.0:" + params.containerPort + ":" + params.exposePort +  "pipeline:$BUILD_NUMBER"
+                        bat "docker run -it --name pipeline$BUILD_NUMBER -p 0.0.0.0:" + params.containerPort + ":" + params.exposePort +  "pipeline:$BUILD_NUMBER"
                     }
                     echo "Deploy Completed...... "
                 }
