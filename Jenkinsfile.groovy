@@ -9,6 +9,12 @@ properties([parameters([choice(choices: ['6.0.4', '6.0.3', '6.0.0'].join("\n"),
                         string(defaultValue: "https://github.com/sonurepos91/jenkins-docker-demo.git",
                                 description: "Git URL",
                                 name: "gitUrl"),
+                        string(defaultValue: "",
+                                description: "Container Port",
+                                name: "containerPort"),
+                        string(defaultValue: "9002",
+                                description: "Expose Port",
+                                name: "exposePort"),
                         booleanParam(defaultValue: false,
                                 description: "Git Poll Enabled",
                                 name: "gitPoll"),
@@ -30,7 +36,7 @@ pipeline {
     }
 
     stages {
-        stage("Checkout") {
+        stage("scmCheckout") {
             steps {
                 script {
                     echo "Git  Checkout Started...... "
@@ -53,6 +59,7 @@ pipeline {
 
                     ]
                     withEnv(PROJECT_WIN_VARS) {
+
                         String PROJECT_PARAMS = "-Dmaven.test.failure.ignore=true"
                         dir(env.WORKSPACE + '\\Project') {
                             bat "mvn ${PROJECT_PARAMS} clean"
@@ -63,14 +70,13 @@ pipeline {
                 }
             }
         }
-        stage("DeployToDocker") {
+        stage("Deploy") {
             steps {
                 script {
                     echo "Deploy Started...... "
                     dir(env.WORKSPACE + '\\Project') {
                         bat "docker build -t pipeline:$BUILD_NUMBER ."
-                        bat "docker create -it --name pipeline$BUILD_NUMBER -p 0.0.0.0:54671:9002 pipeline:$BUILD_NUMBER"
-                        bat "docker start pipeline$BUILD_NUMBER"
+                        bat "docker run -it -d --name pipeline$BUILD_NUMBER -p 0.0.0.0:" + params.containerPort + ":" + params.exposePort +  "pipeline:$BUILD_NUMBER"
                     }
                     echo "Deploy Completed...... "
                 }
