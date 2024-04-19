@@ -80,7 +80,7 @@ pipeline {
                 }
             }
         }
-        stage("Deploy") {
+        stage("Docker") {
             steps {
                 script {
                     echo "Deploy Started...... "
