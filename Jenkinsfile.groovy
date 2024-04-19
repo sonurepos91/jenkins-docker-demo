@@ -46,7 +46,7 @@ pipeline {
     }
 
     stages {
-        stage("scmCheckout") {
+        stage("Checkout") {
             steps {
                 script {
                     echo "Git  Checkout Started...... "
@@ -85,11 +85,11 @@ pipeline {
                 script {
                     echo "Deploy Started...... "
                     dir(env.WORKSPACE + '\\Project') {
-                        docker.withRegistry('', 'registryCredential') {
+                      //  docker.withRegistry('', 'registryCredential') {
                             bat "docker build -t pipeline:$BUILD_NUMBER ."
                             bat "docker create -it --name pipeline$BUILD_NUMBER -p 0.0.0.0:" + params.containerPort + ":" + params.exposePort + " pipeline:$BUILD_NUMBER"
                             bat "docker start pipeline$BUILD_NUMBER"
-                        }
+                       // }
                     }
                     echo "Deploy Completed...... "
                 }
