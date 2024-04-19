@@ -15,11 +15,11 @@ properties([
                                 description: "Git URL",
                                 name: "gitUrl"
                         ),
-                        string(defaultValue: "",
+                        string(defaultValue: "57862",
                                 description: "Container Port",
                                 name: "containerPort"
                         ),
-                        string(defaultValue: "9002",
+                        string(defaultValue: "9005",
                                 description: "Expose Port",
                                 name: "exposePort"
                         ),
@@ -85,9 +85,11 @@ pipeline {
                 script {
                     echo "Deploy Started...... "
                     dir(env.WORKSPACE + '\\Project') {
-                        bat "docker build -t pipeline:$BUILD_NUMBER ."
-                        bat "docker create -it --name pipeline$BUILD_NUMBER -p 0.0.0.0:" + params.containerPort + ":" + params.exposePort + " pipeline:$BUILD_NUMBER"
-                        bat "docker start pipeline$BUILD_NUMBER"
+                        docker.withRegistry('', 'registryCredential') {
+                            bat "docker build -t pipeline:$BUILD_NUMBER ."
+                            bat "docker create -it --name pipeline$BUILD_NUMBER -p 0.0.0.0:" + params.containerPort + ":" + params.exposePort + " pipeline:$BUILD_NUMBER"
+                            bat "docker start pipeline$BUILD_NUMBER"
+                        }
                     }
                     echo "Deploy Completed...... "
                 }
