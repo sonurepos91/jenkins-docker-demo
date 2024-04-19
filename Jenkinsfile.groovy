@@ -1,28 +1,38 @@
 #!Groovy Pipeline Script
 
-properties([parameters([choice(choices: ['6.0.4', '6.0.3', '6.0.0'].join("\n"),
-        description: 'Build Version',
-        name: 'buildVersion'),
+properties([
+        parameters([
+                choice(
+                        choices: ['6.0.4', '6.0.3', '6.0.0'].join("\n"),
+                        description: 'Build Version',
+                        name: 'buildVersion'
+                       ),
                         string(defaultValue: "develop",
                                 description: "Git Branch",
-                                name: "gitBranch"),
+                                name: "gitBranch"
+                        ),
                         string(defaultValue: "https://github.com/sonurepos91/jenkins-docker-demo.git",
                                 description: "Git URL",
-                                name: "gitUrl"),
+                                name: "gitUrl"
+                        ),
                         string(defaultValue: "",
                                 description: "Container Port",
-                                name: "containerPort"),
+                                name: "containerPort"
+                        ),
                         string(defaultValue: "9002",
                                 description: "Expose Port",
-                                name: "exposePort"),
+                                name: "exposePort"
+                        ),
                         booleanParam(defaultValue: false,
                                 description: "Git Poll Enabled",
-                                name: "gitPoll"),
+                                name: "gitPoll"
+                        ),
                         booleanParam(defaultValue: false,
                                 description: "Git ChangeLog Enabled",
-                                name: "changeLog")
-
-])])
+                                name: "changeLog"
+                        )
+        ])
+])
 pipeline {
 
     agent any
@@ -76,7 +86,8 @@ pipeline {
                     echo "Deploy Started...... "
                     dir(env.WORKSPACE + '\\Project') {
                         bat "docker build -t pipeline:$BUILD_NUMBER ."
-                        bat "docker run -it --name pipeline$BUILD_NUMBER -p 0.0.0.0:" + params.containerPort + ":" + params.exposePort +  "pipeline:$BUILD_NUMBER"
+                        bat "docker create -it --name pipeline$BUILD_NUMBER -p 0.0.0.0:" + params.containerPort + ":" + params.exposePort + " pipeline:$BUILD_NUMBER"
+                        bat "docker start pipeline$BUILD_NUMBER"
                     }
                     echo "Deploy Completed...... "
                 }
