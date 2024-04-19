@@ -43,6 +43,7 @@ pipeline {
 
         registry = "sonukumar9939/test9939"
         registryCredential = 'dockerHub_ID'
+        dockerImage = ''
     }
 
     stages {
@@ -80,16 +81,15 @@ pipeline {
                 }
             }
         }
-        stage("Docker") {
+        stage("DockerImage") {
             steps {
                 script {
                     echo "Deploy Started...... "
                     dir(env.WORKSPACE + '\\Project') {
-                      //  docker.withRegistry('', 'registryCredential') {
-                            bat "docker build -t pipeline:$BUILD_NUMBER ."
-                            bat "docker create -it --name pipeline$BUILD_NUMBER -p 0.0.0.0:" + params.containerPort + ":" + params.exposePort + " pipeline:$BUILD_NUMBER"
-                            bat "docker start pipeline$BUILD_NUMBER"
-                       // }
+                        dockerImage = docker.build $JOB_NAME + ":$BUILD_NUMBER"
+                        docker.withRegistry('', 'registryCredential') {
+                            dockerImage.push();
+                       }
                     }
                     echo "Deploy Completed...... "
                 }
