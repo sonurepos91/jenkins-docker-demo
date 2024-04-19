@@ -86,7 +86,7 @@ pipeline {
                 script {
                     echo "Deploy Started...... "
                     dir(env.WORKSPACE + '\\Project') {
-                        dockerImage = docker.build "jenkins9939" + ":$BUILD_NUMBER"
+                        dockerImage = docker.build registry + ":$BUILD_NUMBER"
                         docker.withRegistry('', 'dockerHub_ID') {
                             dockerImage.push();
                        }
