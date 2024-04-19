@@ -1,44 +1,36 @@
 #!Groovy Pipeline Script
 
-properties([parameters(
-        [
-                choice(
-                        choices: ['6.0.4', '6.0.3', '6.0.0'].join("\n"),
-                        description: 'Build Version',
-                        name: 'buildVersion'
-                ),
-                string(
-                        defaultValue: "develop",
-                        description: "Git Branch",
-                        name: "gitBranch"
-                ),
-                string(
-                        defaultValue: "https://github.com/sonurepos91/jenkins-docker-demo.git",
-                        description: "Git URL",
-                        name: "gitUrl"
-                ),
-                booleanParam(
-                        defaultValue: false,
-                        description: "Git Poll Enabled",
-                        name: "gitPoll"
-                ),
-                booleanParam(
-                        defaultValue: false,
-                        description: "Git ChangeLog Enabled",
-                        name: "changeLog"
-                )
+properties([parameters([choice(choices: ['6.0.4', '6.0.3', '6.0.0'].join("\n"),
+        description: 'Build Version',
+        name: 'buildVersion'),
+                        string(defaultValue: "develop",
+                                description: "Git Branch",
+                                name: "gitBranch"),
+                        string(defaultValue: "https://github.com/sonurepos91/jenkins-docker-demo.git",
+                                description: "Git URL",
+                                name: "gitUrl"),
+                        booleanParam(defaultValue: false,
+                                description: "Git Poll Enabled",
+                                name: "gitPoll"),
+                        booleanParam(defaultValue: false,
+                                description: "Git ChangeLog Enabled",
+                                name: "changeLog")
 
-        ]
-)])
+])])
 pipeline {
 
     agent any
     options {
         skipDefaultCheckout true
     }
+    environment {
+
+        registry = "sonukumar9939/test9939"
+        registryCredential = 'dockerHub_ID'
+    }
 
     stages {
-        stage("scmCheckout") {
+        stage("Checkout") {
             steps {
                 script {
                     echo "Git  Checkout Started...... "
@@ -55,14 +47,12 @@ pipeline {
             steps {
                 script {
                     echo "Maven Build Started...... "
-                    List PROJECT_WIN_VARS = [
-                            "JAVA_HOME=C:\\Program Files\\Java\\jdk-17\\",
-                            "MAVEN_HOME=C:\\Softwares\\apache-maven-3.9.5-bin\\apache-maven-3.9.5\\",
-                            "PATH=C:\\WINDOWS\\SYSTEM32;C:\\Softwares\\apache-maven-3.9.5-bin\\apache-maven-3.9.5\\bin;%PATH%"
+                    List PROJECT_WIN_VARS = ["JAVA_HOME=C:\\Program Files\\Java\\jdk-17\\",
+                                             "MAVEN_HOME=C:\\Softwares\\apache-maven-3.9.5-bin\\apache-maven-3.9.5\\",
+                                             "PATH=C:\\WINDOWS\\SYSTEM32;C:\\Softwares\\apache-maven-3.9.5-bin\\apache-maven-3.9.5\\bin;%PATH%"
 
                     ]
                     withEnv(PROJECT_WIN_VARS) {
-
                         String PROJECT_PARAMS = "-Dmaven.test.failure.ignore=true"
                         dir(env.WORKSPACE + '\\Project') {
                             bat "mvn ${PROJECT_PARAMS} clean"
@@ -73,10 +63,16 @@ pipeline {
                 }
             }
         }
-        stage("Deploy") {
+        stage("DeployToDocker") {
             steps {
-                echo "Deploy Started...... "
-                echo "Deploy Completed...... "
+                script {
+                    echo "Deploy Started...... "
+                    dir(env.WORKSPACE + '\\Project') {
+                        bat "docker build -t pipeline:$BUILD_NUMBER ."
+                        bat "docker run -it -d --name pipeline$BUILD_NUMBER -p 0.0.0.0:54671:9002 pipeline:$BUILD_NUMBER"
+                    }
+                    echo "Deploy Completed...... "
+                }
             }
         }
     }
@@ -88,12 +84,8 @@ def scmCheckout(String gitBranch, String gitUrl, Boolean gitPoll, Boolean change
     echo "Workspace :" + workspace
 
     checkout changelog: false, poll: false,
-            scm: scmGit(
-                    branches: [[name: '*/' + gitBranch]],
+            scm: scmGit(branches: [[name: '*/' + gitBranch]],
                     extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: env.WORKSPACE + '\\Project']],
                     relativeTargetDir: env.WORKSPACE + '\\Project',
-                    userRemoteConfigs:
-                            [
-                                    [url: gitUrl]]
-            )
+                    userRemoteConfigs: [[url: gitUrl]])
 }
